@@ -80,6 +80,10 @@ export const ObjectOptionsDropdownMenuViewName = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const { dropdownId } = useObjectOptionsDropdown();
 
+  const handleViewNameChange = useDebouncedCallback((value: string) => {
+    setAndPersistViewName(value, currentView);
+  }, 500);
+
   useHotkeysOnFocusedElement({
     keys: [Key.Enter],
     callback: async () => {
@@ -87,10 +91,16 @@ export const ObjectOptionsDropdownMenuViewName = ({
         return;
       }
 
+      handleViewNameChange.flush();
+
       await updateViewFromCurrentState();
     },
     focusId: dropdownId,
-    dependencies: [viewPickerIsPersisting, updateViewFromCurrentState],
+    dependencies: [
+      viewPickerIsPersisting,
+      updateViewFromCurrentState,
+      handleViewNameChange,
+    ],
   });
 
   const handleIconChange = ({ iconKey }: { iconKey: string }) => {
@@ -98,10 +108,6 @@ export const ObjectOptionsDropdownMenuViewName = ({
     setViewPickerSelectedIcon(iconKey);
     setAndPersistViewIcon(iconKey, currentView);
   };
-
-  const handleViewNameChange = useDebouncedCallback((value: string) => {
-    setAndPersistViewName(value, currentView);
-  }, 500);
 
   useEffect(() => {
     setViewPickerSelectedIcon(currentView.icon);
